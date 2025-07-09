@@ -1,0 +1,23 @@
+# IDE files  
+.idea/  
+*.iml  
+.nb-gradle/  
+netbeans/  
+  
+# Build files  
+target/  
+bin/  
+build/  
+out/  
+  
+# Dependency files  
+.m2/  
+.mvn/wrapper/  
+  
+# Logs and runtime  
+*.log  
+logs/  
+  
+# System files  
+.DS_Store  
+Thumbs.db 
