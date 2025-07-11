@@ -21,12 +21,14 @@ public class Payment {
 
     private BigDecimal amount;
 
-    private String status;  // SUCCESS, FAILED
-    private String type;    // DEPOSIT, WITHDRAW, TRANSFER, RECEIVE
+    private String status;  
+    private String type;    
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private Long userId; // Used for DEPOSIT/WITHDRAW/created by/initiated by
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
     
 }
 

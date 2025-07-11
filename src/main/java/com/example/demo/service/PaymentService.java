@@ -17,31 +17,29 @@ public class PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private AccountService accountService;  
+    private AccountService accountService;
 
     public Payment depositMoney(Long userId, BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be greater than 0");
         }
 
-       
         Account account = accountService.getAccountByUserId(userId);
 
         if (account == null) {
             throw new RuntimeException("Account not found for user ID: " + userId);
         }
+
         account.setBalance(account.getBalance().add(amount));
 
-        accountService.updateAccount(account); 
+        accountService.updateAccount(account);
 
-        Payment payment = new Payment(
-            null, null, null,
-            amount,
-            "SUCCESS",
-            "DEPOSIT",
-            LocalDateTime.now(),
-            userId
-        );
+        Payment payment = new Payment();
+        payment.setAccount(account); 
+        payment.setAmount(amount);
+        payment.setType("DEPOSIT");
+        payment.setStatus("SUCCESS");
+        payment.setCreatedAt(LocalDateTime.now());
 
         return paymentRepository.save(payment);
     }

@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "accounts", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "userId")  //  Enforce unique userId 
+    @UniqueConstraint(columnNames = "userId")  
 })
 @Data
 @NoArgsConstructor
@@ -21,11 +21,11 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "User ID cannot be null")  //  Prevent null userId
+    @NotNull(message = "User ID cannot be null")  
     private Long userId;
 
     @NotNull(message = "Balance cannot be null")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Balance must be greater than 0")  //  Positive balance
+    @DecimalMin(value = "0.0", inclusive = false, message = "Balance must be greater than 0")  
     private BigDecimal balance;
     
     @NotNull(message = "Name cannot be null")
