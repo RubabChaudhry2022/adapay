@@ -1,4 +1,4 @@
-package com.fintech.authorization_service;
+package com.fintech.authservice;
 
 
 import org.springframework.boot.SpringApplication;
