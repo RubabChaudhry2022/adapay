@@ -1,6 +1,4 @@
-
 package com.fintech.authservice.dto;
-
 public class UserResponse {
     private String name;
     private String email;

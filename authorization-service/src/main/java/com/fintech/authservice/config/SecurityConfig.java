@@ -19,8 +19,8 @@ import org.springframework.security.web.SecurityFilterChain;
           .authorizeHttpRequests(auth -> auth
               .requestMatchers(
                   "/v1/auth/login",
-                  "/v1/auth/signup")
-                .permitAll().requestMatchers("/v1/auth/admin/**").permitAll().anyRequest().authenticated()
+                  "/v1/auth/signup","/v1/auth/refresh")
+                .permitAll().requestMatchers("/v1/auth/**").permitAll().anyRequest().authenticated()
           );
       return http.build();
       }

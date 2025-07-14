@@ -22,10 +22,10 @@ public class User {
     private Long id;
 
     @NotBlank(message = "First name is required")
-    private String firstname;
+    private String firstName;
 
     @NotBlank(message = "Last name is required")
-    private String lastname;
+    private String lastName;
 
     @NotBlank(message = "Password is required")
     private String password;
@@ -35,14 +35,16 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @NotBlank(message = "Phone number is required")
     @Pattern(
         regexp = "^\\d{11}$",  
         message = "Phone number must be 11 digits"
     )
-    private String number;
+    private String phone_number;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+    
 }
 
 
