@@ -45,11 +45,8 @@ public class AccountService {
         AccountModel existing = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-        existing.setBalance(updatedDTO.getBalance());
-        existing.setStatus(updatedDTO.getStatus());
-        existing.setTitle(updatedDTO.getTitle());
-
-        AccountModel updated = accountRepository.save(existing);
+          existing.setStatus(updatedDTO.getStatus());
+       AccountModel updated = accountRepository.save(existing);
         log.info("Account updated for userId={}", userId);
         return AccountMapper.toDTO(updated);
     }
