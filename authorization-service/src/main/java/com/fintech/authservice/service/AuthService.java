@@ -1,154 +1,159 @@
 package com.fintech.authservice.service;
+
 import com.fintech.authservice.dto.LoginRequest;
+import com.fintech.authservice.dto.SignupRequest;
+import com.fintech.authservice.dto.UserCreationRequest;
 import com.fintech.authservice.dto.UserResponse;
+import com.fintech.authservice.exception.ResourceAlreadyExistsException;
+import com.fintech.authservice.exception.ResourceNotFoundException;
 import com.fintech.authservice.model.Role;
 import com.fintech.authservice.model.User;
 import com.fintech.authservice.repository.UserRepository;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
+@Slf4j
 @Service
+
 public class AuthService {
-@Autowired
-private UserRepository userRepository;
-@Autowired 
-private PasswordEncoder passwordEncoder;
-@Autowired
-private JwtService jwtService;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtService jwtService;
 
-public ResponseEntity<?> signup(User user) {
+	public ResponseEntity<?> signup(SignupRequest request) {
+		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+			throw new ResourceAlreadyExistsException("Email already exists");
+		}
 
-    if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-        return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
-    }
+		User user = new User();
+		user.setFirstName(request.getFirstName());
+		user.setLastName(request.getLastName());
+		user.setPhoneNumber(request.getPhoneNumber());
+		user.setEmail(request.getEmail());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+		// Assign role based on email domain
+		Role assignedRole = request.getEmail().endsWith("@vaultspay.com") ? Role.ADMIN : Role.USER;
+		user.setRole(assignedRole);
 
-    // Set role based on email
-    user.setRole(user.getEmail().equalsIgnoreCase("admin@vaultspay.com") ? Role.ADMIN : Role.USER);
+		userRepository.save(user);
 
-    userRepository.save(user);
-
-    String token = jwtService.generateToken(user.getEmail(), user.getRole());
-    String fullName = user.getFirstname() + " " + user.getLastname();
-
-    return ResponseEntity.ok(Map.of(
-        "message", "Account created successfully",
-        "user", new UserResponse(fullName, user.getEmail(), user.getNumber())
-    ));
-}
-
-public ResponseEntity<?> login(LoginRequest request) {
-	Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
-	if(userOpt.isEmpty()) {
-		 return ResponseEntity.badRequest().body(Map.of("error", "Email does not exist"));
+		String fullName = user.getFirstName() + " " + user.getLastName();
+		return ResponseEntity.ok(Map.of("message", "Account created successfully", "user",
+				new UserResponse(fullName, user.getEmail(), user.getPhoneNumber())));
 	}
-	User user=userOpt.get();
-	 if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-         return ResponseEntity.badRequest().body(Map.of("error", "Incorrect password"));
-     }
-	
 
-	 String token = jwtService.generateToken(user.getEmail(), user.getRole());
-	 return ResponseEntity.ok(Map.of(
-             "message", "Login successful",
-             "token", token        
-     ));
-}
-public ResponseEntity<?> viewUsers(String token){
-	 if (!jwtService.validateToken(token)) {
-         return ResponseEntity.badRequest().body(Map.of("error", "Invalid token"));
-     }
-	String role=jwtService.extractRole(token);
-	 if (!"ADMIN".equalsIgnoreCase(role)) {
-	        return ResponseEntity.badRequest().body(Map.of("error", "Access denied"));
-	    }
-	 System.out.println("Received Token = " + token);
-	 System.out.println("Extracted Role = " + jwtService.extractRole(token));
+	public ResponseEntity<?> login(LoginRequest request) {
+		User user = userRepository.findByEmail(request.getEmail())
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-	 return ResponseEntity.ok(userRepository.findAll());
-}
+		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+			throw new AccessDeniedException("Invalid credentials");
+		}
 
+		String accessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
+		String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getId(), user.getRole());
+		Date expiration = jwtService.extractExpiration(accessToken);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return ResponseEntity.ok(Map.of("message", "Login successful", "accessToken", accessToken, "refreshToken",
+				refreshToken, "expiresAt", sdf.format(expiration)));
+	}
+	/*
+	 * public ResponseEntity<?> login(LoginRequest request) { try { User user =
+	 * userRepository.findByEmail(request.getEmail()) .orElseThrow(() -> new
+	 * ResourceNotFoundException("User not found"));
+	 * 
+	 * if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+	 * throw new AccessDeniedException("Invalid credentials"); }
+	 * 
+	 * String accessToken = jwtService.generateToken(user.getEmail(), user.getId(),
+	 * user.getRole()); String refreshToken =
+	 * jwtService.generateRefreshToken(user.getEmail(), user.getId(),
+	 * user.getRole()); Date expiration = jwtService.extractExpiration(accessToken);
+	 * 
+	 * SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	 * 
+	 * return ResponseEntity.ok(Map.of( "message", "Login successful",
+	 * "accessToken", accessToken, "refreshToken", refreshToken, "expiresAt",
+	 * sdf.format(expiration) ));
+	 * 
+	 * } catch (ResourceNotFoundException | AccessDeniedException e) { // known
+	 * exceptions return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+	 * "error", e.getMessage() )); } catch (Exception e) { // unexpected exception
+	 * e.printStackTrace(); // to log in console return
+	 * ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of( "error",
+	 * "An unexpected error occurred" )); } }
+	 */
 
+	private User getAuthenticatedUser() {
+		String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+	}
 
-public ResponseEntity<?> addUser(String token, User newUser){
-	 if (!jwtService.validateToken(token)) {
-         return ResponseEntity.badRequest().body(Map.of("error", "Invalid token"));
-     }
-	String role=jwtService.extractRole(token);
-	System.out.println("Role from token: " + role);
-	 if (!"ADMIN".equalsIgnoreCase(role)) {
-	        return ResponseEntity.badRequest().body(Map.of("error", "Access denied"));
-	    }
-	 if(userRepository.findByEmail(newUser.getEmail()).isPresent()) {
-		 return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
-	 }
-	 newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-	    newUser.setRole(Role.USER); // All added users are USER
+	public ResponseEntity<?> viewUsers() {
+		User currentUser = getAuthenticatedUser();
+		if (currentUser.getRole() != Role.ADMIN) {
+			throw new AccessDeniedException("Access denied");
 
-	    userRepository.save(newUser);
+		}
 
-	    String newToken = jwtService.generateToken(newUser.getEmail(), newUser.getRole());
-	    String fullName = newUser.getFirstname() + " " + newUser.getLastname();
+		return ResponseEntity.ok(userRepository.findAll());
+	}
 
-	    return ResponseEntity.ok(Map.of(
-	        "message", "User added successfully",
-	        "token", newToken,
-	        "user", new UserResponse(fullName, newUser.getEmail(), newUser.getNumber())
-	    ));
+	public ResponseEntity<?> createUsers(String adminEmail, UserCreationRequest request) {
+		User currentUser = userRepository.findByEmail(adminEmail)
+				.orElseThrow(() -> new ResourceNotFoundException("Admin user not found"));
+		if (currentUser.getRole() != Role.ADMIN) {
+			throw new AccessDeniedException("Access denied");
 
-}
+		}
 
-//Delete a user
+		if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+			throw new ResourceAlreadyExistsException("Email already exists");
+		}
 
-public ResponseEntity<?> deleteUser(String token,String delEmail){
-	 if (!jwtService.validateToken(token)) {
-         return ResponseEntity.badRequest().body(Map.of("error", "Invalid token"));
-     }
-	String role=jwtService.extractRole(token);
-	 if (!"ADMIN".equalsIgnoreCase(role)) {
-	        return ResponseEntity.badRequest().body(Map.of("error", "Access denied"));
-	    }
-	 Optional<User> userOpt= userRepository.findByEmail(delEmail);
-	 if(userOpt.isEmpty()) {
-		 return ResponseEntity.badRequest().body(Map.of("error", "Email does not exist"));
-	 }
-	 userRepository.delete(userOpt.get());
-	 return ResponseEntity.ok(Map.of("message","user deleted successfully"));
-}
+		if (request.getRole() == Role.ADMIN && !request.getEmail().endsWith("@vaultspay.com")) {
+			throw new IllegalArgumentException("Admin email must end with @vaultspay.com");
+		}
 
-//add admin
-public ResponseEntity<?> addAdmin(String token, User newAdmin){
-	 if (!jwtService.validateToken(token)) {
-        return ResponseEntity.badRequest().body(Map.of("error", "Invalid token"));
-    }
-	String role=jwtService.extractRole(token);
-	 if (!"ADMIN".equalsIgnoreCase(role)) {
-	        return ResponseEntity.badRequest().body(Map.of("error", "Access denied"));
-	    }
-	 if(userRepository.findByEmail(newAdmin.getEmail()).isPresent()) {
-		 return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
-	 }
-	 newAdmin.setPassword(passwordEncoder.encode(newAdmin.getPassword()));
-    newAdmin.setRole(Role.ADMIN);
-userRepository.save(newAdmin);
+		User user = new User();
+		user.setFirstName(request.getFirstName());
+		user.setLastName(request.getLastName());
+		user.setPhoneNumber(request.getPhoneNumber());
+		user.setEmail(request.getEmail());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setRole(request.getRole());
 
-String newToken = jwtService.generateToken(newAdmin.getEmail(), newAdmin.getRole());
-String fullName = newAdmin.getFirstname() + " " + newAdmin.getLastname();
+		userRepository.save(user);
 
-return ResponseEntity.ok(Map.of(
-    "message", "Admin added successfully",
-    "token", newToken,
-    "user", new UserResponse(fullName, newAdmin.getEmail(), newAdmin.getNumber())
-));
+		return ResponseEntity.ok(Map.of("message", user.getRole() + " created successfully", "user", new UserResponse(
+				user.getFirstName() + " " + user.getLastName(), user.getEmail(), user.getPhoneNumber())));
+	}
 
-//return ResponseEntity.ok(Map.of("message", "admin added successfully"));
-}
+	public ResponseEntity<?> refreshAccessToken(String refreshToken) {
+		if (!jwtService.isRefreshToken(refreshToken)) {
+			throw new AccessDeniedException("Invalid refresh token");
+		}
+
+		String email = jwtService.extractEmail(refreshToken);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		String newAccessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
+
+		return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+	}
 
 }
