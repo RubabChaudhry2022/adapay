@@ -8,7 +8,9 @@ import com.example.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,9 +25,15 @@ public class AccountService {
                 .ifPresent(a -> {
                     throw new ResourceAlreadyExistsException("Account already exists for this user");
                 });
+
         AccountModel model = AccountMapper.toModel(accountDTO);
+
+        model.setBalance(BigDecimal.ZERO);
+
+        model.setAccountNumber(generateUniqueAccountNumber());
+
         AccountModel saved = accountRepository.save(model);
-        log.info("Account created for userId={}", saved.getUserId());
+        log.info("Account created for userId={}, accountNumber={}", saved.getUserId(), saved.getAccountNumber());
         return AccountMapper.toDTO(saved);
     }
 
@@ -45,8 +53,9 @@ public class AccountService {
         AccountModel existing = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-          existing.setStatus(updatedDTO.getStatus());
-       AccountModel updated = accountRepository.save(existing);
+       existing.setStatus(updatedDTO.getStatus());
+
+        AccountModel updated = accountRepository.save(existing);
         log.info("Account updated for userId={}", userId);
         return AccountMapper.toDTO(updated);
     }
@@ -56,5 +65,13 @@ public class AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         accountRepository.delete(existing);
         log.info("Account deleted for userId={}", userId);
+    }
+
+    private String generateUniqueAccountNumber() {
+        String accountNumber;
+        do {
+            accountNumber = "ACC" + System.currentTimeMillis() + (int)(Math.random() * 1000);
+        } while (accountRepository.findByAccountNumber(accountNumber).isPresent());
+        return accountNumber;
     }
 }

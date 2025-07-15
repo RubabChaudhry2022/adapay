@@ -28,8 +28,8 @@ public class AccountModel {
     private String accountNumber;  
 
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    private BigDecimal balance;
+    @DecimalMin(value = "0.0", inclusive = true)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     private Currency currency = Currency.PKR;
