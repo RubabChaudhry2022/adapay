@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class UserCreationRequest {
 
-<<<<<<< HEAD
+
 	    @NotBlank
 	    private String firstName;
 
@@ -20,7 +20,7 @@ public class UserCreationRequest {
 	    private String email;
 
 	    @NotBlank
-	    private String phone_number;
+	    private String phoneNumber;
 
 	    @NotBlank
 	    private String password;
@@ -29,23 +29,3 @@ public class UserCreationRequest {
 
 	 
 	}
-=======
-	@NotBlank
-	private String firstName;
-
-	@NotBlank
-	private String lastName;
-
-	@Email
-	private String email;
-
-	@NotBlank
-	private String phoneNumber;
-
-	@NotBlank
-	private String password;
-
-	private Role role; // USER or ADMIN
-
-}
->>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)

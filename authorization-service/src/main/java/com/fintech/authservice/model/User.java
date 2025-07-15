@@ -19,19 +19,13 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-<<<<<<< HEAD
+
     @NotBlank(message = "First name is required")
     private String firstName;
 
     @NotBlank(message = "Last name is required")
     private String lastName;
-=======
-	@NotBlank(message = "First name is required")
-	private String firstName;
 
-	@NotBlank(message = "Last name is required")
-	private String lastName;
->>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)
 
 	@NotBlank(message = "Password is required")
 	private String password;
@@ -41,24 +35,16 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
-<<<<<<< HEAD
+
     @NotBlank(message = "Phone number is required")
     @Pattern(
         regexp = "^\\d{11}$",  
         message = "Phone number must be 11 digits"
     )
-    private String phone_number;
+    private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     private Role role;
     
-=======
-	@NotBlank(message = "Phone number is required")
-	@Pattern(regexp = "^\\d{11}$", message = "Phone number must be 11 digits")
-	private String phoneNumber;
 
-	@Enumerated(EnumType.STRING)
-	private Role role;
-
->>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)
 }

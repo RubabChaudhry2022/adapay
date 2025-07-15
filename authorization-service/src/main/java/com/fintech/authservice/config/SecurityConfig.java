@@ -13,32 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-<<<<<<< HEAD
-     @Configuration
-     public class SecurityConfig {
-    	 @Bean
-    		public PasswordEncoder passwordEncoder() {
-    		    return new BCryptPasswordEncoder();
-    		}
-     	@Bean
-      public SecurityFilterChain filterChain(HttpSecurity http)throws Exception{
-      
-    	  http.csrf(csrf -> csrf.disable())
-          .authorizeHttpRequests(auth -> auth
-              .requestMatchers(
-                  "/v1/auth/login",
-                  "/v1/auth/signup","/v1/auth/refresh")
-                .permitAll().requestMatchers("/v1/auth/**").permitAll().anyRequest().authenticated()
-          );
-      return http.build();
-      }
-      
-  
- 
-=======
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity // Enables @PreAuthorize annotations
+@EnableMethodSecurity 
 public class SecurityConfig {
 
 	private final JwtFilter jwtFilter;
@@ -62,5 +39,5 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
 	}
->>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)
+
 }
