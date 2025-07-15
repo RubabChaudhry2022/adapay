@@ -4,18 +4,22 @@ import com.fintech.authservice.dto.SignupRequest;
 import com.fintech.authservice.dto.UserCreationRequest;
 import com.fintech.authservice.service.AuthService;
 import jakarta.validation.Valid;
+<<<<<<< HEAD
 import java.util.Map;
+=======
+>>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.validation.BindingResult;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("v1/auth")
-public class AuthController{
-	
+public class AuthController {
+
 	@Autowired
+<<<<<<< HEAD
 	public AuthService authService;
 @PostMapping("/signup")
 public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request, BindingResult result){
@@ -59,5 +63,41 @@ public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String aut
     return authService.refreshAccessToken(refreshToken);
   
 }
+=======
+	private AuthService authService;
+
+	@PostMapping("/signup")
+	public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
+		return authService.signup(request);
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+		return authService.login(request);
+	}
+
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@GetMapping("/users")
+	public ResponseEntity<?> users() {
+		return authService.viewUsers();
+	}
+
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PostMapping("/users")
+	public ResponseEntity<?> createUsers(@Valid @RequestBody UserCreationRequest request,
+			Authentication authentication) {
+
+		String email = authentication.getName();
+		return authService.createUsers(email, request);
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String authHeader) {
+		String refreshToken = authHeader.substring(7);
+		System.out.println("Received Refresh Token: " + refreshToken);
+		return authService.refreshAccessToken(refreshToken);
+
+	}
+>>>>>>> 022c01f (Removed apache-maven files and updated .gitignore)
 
 }
