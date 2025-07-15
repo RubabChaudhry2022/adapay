@@ -1,0 +1,15 @@
+# Eclipse files
+ /.classpath
+ /.project
+ /.settings/
+ # Maven / Gradle
+ /target/
+ /build/
+ # OS & IDE
+ .DS_Store
+ *.log
+ *.iml
+ .idea/
+ *.class
+ # Lombok delombok cache
+ /lombok.config

@@ -11,3 +11,4 @@ public class DepositRequest {
 	private String transactionReferenceId;
 	private String narration;
 }
+
