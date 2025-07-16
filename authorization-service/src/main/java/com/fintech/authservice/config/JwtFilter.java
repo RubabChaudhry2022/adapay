@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
 					response.getWriter().write("{\"error\": \"Only refresh tokens are allowed on this endpoint\"}");
 					return;
 				}
-			
+
 				filterChain.doFilter(request, response);
 				return;
 			}

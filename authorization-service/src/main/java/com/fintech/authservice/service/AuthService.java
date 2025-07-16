@@ -55,28 +55,28 @@ public class AuthService {
 	}
 
 	public ResponseEntity<?> login(LoginRequest request) {
-		 try {
-		        log.info("Attempting login for email: {}", request.getEmail());
-		User user = userRepository.findByEmail(request.getEmail())
-				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		try {
+			log.info("Attempting login for email: {}", request.getEmail());
+			User user = userRepository.findByEmail(request.getEmail())
+					.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-			throw new AccessDeniedException("Invalid credentials");
+			if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+				throw new AccessDeniedException("Invalid credentials");
+			}
+
+			String accessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
+			String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getId(), user.getRole());
+			Date expiration = jwtService.extractExpiration(accessToken);
+
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			return ResponseEntity.ok(Map.of("message", "Login successful", "accessToken", accessToken, "refreshToken",
+					refreshToken, "expiresAt", sdf.format(expiration)));
+		} catch (Exception ex) {
+			log.error("Login failed", ex); // <--- this will give you the real reason in logs
+			throw ex;
 		}
-
-		String accessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
-		String refreshToken = jwtService.generateRefreshToken(user.getEmail(), user.getId(), user.getRole());
-		Date expiration = jwtService.extractExpiration(accessToken);
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-		return ResponseEntity.ok(Map.of("message", "Login successful", "accessToken", accessToken, "refreshToken",
-				refreshToken, "expiresAt", sdf.format(expiration)));
-	}catch (Exception ex) {
-        log.error("Login failed", ex); // <--- this will give you the real reason in logs
-        throw ex;
-    }
-}
+	}
 
 	private User getAuthenticatedUser() {
 		String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -133,7 +133,8 @@ public class AuthService {
 		}
 
 		String email = jwtService.extractEmail(refreshToken);
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
 		String newAccessToken = jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
 

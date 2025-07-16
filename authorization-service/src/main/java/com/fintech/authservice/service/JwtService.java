@@ -94,5 +94,6 @@ public class JwtService {
 	public Date extractExpiration(String token) {
 		return extractAllClaims(token).getExpiration();
 	}
+	
 
 }
