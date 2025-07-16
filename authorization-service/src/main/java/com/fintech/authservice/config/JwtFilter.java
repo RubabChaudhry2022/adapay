@@ -21,56 +21,66 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
+	   @Override
+	    protected boolean shouldNotFilter(HttpServletRequest request) {
+	        String path = request.getRequestURI();
+
+	        // Add all public endpoints here
+	        return path.equals("/auth/signup") || path.equals("/auth/login") || path.equals("/auth/refresh");
+	    }
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 
-		String authHeader = request.getHeader("Authorization");
+	    String authHeader = request.getHeader("Authorization");
 
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	    	 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	    	    response.setContentType("application/json");
+	    	    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Missing or invalid Authorization header\"}");
+	    	    return;
+	    	    }
 
-		String token = authHeader.substring(7);
-		String path = request.getServletPath();
-		try {
-			if ("/v1/auth/refresh".equals(path)) {
-				if (!jwtService.isRefreshToken(token)) {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.setContentType("application/json");
-					response.getWriter().write("{\"error\": \"Only refresh tokens are allowed on this endpoint\"}");
-					return;
-				}
+	    String token = authHeader.substring(7);
+	    String path = request.getServletPath();
 
-				filterChain.doFilter(request, response);
-				return;
-			}
+	    try {
+	        if ("/v1/auth/refresh".equals(path)) {
+	            if (!jwtService.isRefreshToken(token)) {
+	                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	                response.setContentType("application/json");
+	                response.getWriter().write("{\"error\": \"Only refresh tokens are allowed on this endpoint\"}");
+	                return;
+	            }
+	            filterChain.doFilter(request, response);
+	            return;
+	        }
 
-			if (!jwtService.isAccessToken(token)) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.setContentType("application/json");
-				response.getWriter().write("{\"error\": \"Refresh token cannot be used here\"}");
-				return;
-			}
+	        if (!jwtService.isAccessToken(token)) {
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            response.setContentType("application/json");
+	            response.getWriter().write("{\"error\": \"Refresh token cannot be used here\"}");
+	            return;
+	        }
 
-			String email = jwtService.extractEmail(token);
-			String role = jwtService.extractRole(token);
+	        // Extract email and role from token
+	        String email = jwtService.extractEmail(token);
+	        String role = jwtService.extractRole(token);
 
-			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, null,
-					List.of(new SimpleGrantedAuthority(role)));
+	        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+	                email,
+	                null,
+	                List.of(new SimpleGrantedAuthority(role))
+	        );
 
-			SecurityContextHolder.getContext().setAuthentication(auth);
+	        SecurityContextHolder.getContext().setAuthentication(auth);
 
-		} catch (Exception ex) {
+	        filterChain.doFilter(request, response);
 
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
-			return;
-		}
-
-		filterChain.doFilter(request, response);
-
-	}
-}
+	    } catch (Exception ex) {
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.setContentType("application/json");
+	        response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+	    }
+	}}

@@ -10,9 +10,6 @@ import com.fintech.authservice.model.Role;
 import com.fintech.authservice.model.User;
 import com.fintech.authservice.repository.UserRepository;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,11 +19,13 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Service
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @RequiredArgsConstructor
 @Slf4j
+@Service
 public class AuthService {
-
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
@@ -43,13 +42,13 @@ public class AuthService {
 		user.setEmail(request.getEmail());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+		// Assign role based on email domain
 		Role assignedRole = request.getEmail().endsWith("@vaultspay.com") ? Role.ADMIN : Role.USER;
 		user.setRole(assignedRole);
 
 		userRepository.save(user);
 
 		String fullName = user.getFirstName() + " " + user.getLastName();
-
 		return ResponseEntity.ok(Map.of("message", "Account created successfully", "user",
 				new UserResponse(fullName, user.getEmail(), user.getPhoneNumber())));
 	}
