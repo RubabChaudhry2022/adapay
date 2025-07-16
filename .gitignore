@@ -12,7 +12,7 @@ target/
 mvnw
 mvnw.cmd
 
-# IDE
+# IDEs
 .idea/
 *.iml
 *.ipr
@@ -25,3 +25,22 @@ logs/
 # System
 .DS_Store
 Thumbs.db
+
+# VS Code
+.vscode/
+
+# Spring Tools Suite
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# HELP.md
+HELP.md
+
+# Specific Target Folders
+!**/src/main/**/target/
+!**/src/test/**/target/
