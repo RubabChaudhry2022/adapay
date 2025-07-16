@@ -9,23 +9,21 @@ import lombok.Data;
 @Data
 public class UserCreationRequest {
 
+	@NotBlank
+	private String firstName;
 
-	    @NotBlank
-	    private String firstName;
+	@NotBlank
+	private String lastName;
 
-	    @NotBlank
-	    private String lastName;
+	@Email
+	private String email;
 
-	    @Email
-	    private String email;
+	@NotBlank
+	private String phoneNumber;
 
-	    @NotBlank
-	    private String phoneNumber;
+	@NotBlank
+	private String password;
 
-	    @NotBlank
-	    private String password;
+	private Role role; // USER or ADMIN
 
-	    private Role role; // USER or ADMIN
-
-	 
-	}
+}

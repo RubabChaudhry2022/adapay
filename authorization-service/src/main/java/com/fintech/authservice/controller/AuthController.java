@@ -53,5 +53,9 @@ public class AuthController {
 		return authService.refreshAccessToken(refreshToken);
 
 	}
-
+	/* @GetMapping("/test")
+	    public ResponseEntity<String> testEndpoint() {
+	        return ResponseEntity.ok("Auth Service is working");
+	    }
+*/
 }

@@ -34,8 +34,27 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		String token = authHeader.substring(7);
-
+		String path = request.getServletPath();
 		try {
+			if ("/v1/auth/refresh".equals(path)) {
+				if (!jwtService.isRefreshToken(token)) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.setContentType("application/json");
+					response.getWriter().write("{\"error\": \"Only refresh tokens are allowed on this endpoint\"}");
+					return;
+				}
+			
+				filterChain.doFilter(request, response);
+				return;
+			}
+
+			if (!jwtService.isAccessToken(token)) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.setContentType("application/json");
+				response.getWriter().write("{\"error\": \"Refresh token cannot be used here\"}");
+				return;
+			}
+
 			String email = jwtService.extractEmail(token);
 			String role = jwtService.extractRole(token);
 
@@ -45,13 +64,13 @@ public class JwtFilter extends OncePerRequestFilter {
 			SecurityContextHolder.getContext().setAuthentication(auth);
 
 		} catch (Exception ex) {
-			// Log the error or send 401 response
+
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
 			return;
 		}
 
 		filterChain.doFilter(request, response);
-	}
 
+	}
 }
