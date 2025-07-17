@@ -1,42 +1,50 @@
 package com.example.demo.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.example.demo.enums.AccountStatus;
+import com.example.demo.enums.Currency;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "accounts", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "userId")  
-})
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "accounts", uniqueConstraints = { @UniqueConstraint(columnNames = "userId"),
+		@UniqueConstraint(columnNames = "accountNumber")
+
+})
 public class Account {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@NotNull
+	private Long userId;
 
-    @NotNull(message = "User ID cannot be null")  
-    private Long userId;
+	@NotNull
+	private String title;
 
-    @NotNull(message = "Balance cannot be null")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Balance must be greater than 0")  
-    private BigDecimal balance;
-    
-    @NotNull(message = "Name cannot be null")
-    private String name;
-    
-    
-    private String currency="PKR";
+	@NotNull
+	private String accountNumber;
 
-    private String status= "ACTIVE"; ;
+	@NotNull
+	@DecimalMin(value = "0.0", inclusive = true)
+	private BigDecimal balance = BigDecimal.ZERO;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+	@Enumerated(EnumType.STRING)
+	private Currency currency = Currency.PKR;
+
+	@Enumerated(EnumType.STRING)
+	private AccountStatus status = AccountStatus.ACTIVE;
+
+	private LocalDateTime createdAt = LocalDateTime.now();
 }
-
-

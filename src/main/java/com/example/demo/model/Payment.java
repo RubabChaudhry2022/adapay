@@ -2,8 +2,10 @@ package com.example.demo.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 import com.example.demo.enums.TransactionStatus;
 import com.example.demo.enums.TransactionType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -57,10 +59,14 @@ public class Payment {
 
 	private LocalDateTime createdAt = LocalDateTime.now();
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "account_id", nullable = false)
-	private Account account; // account field is the one who initiated the transaction and owns the log
-								// entry.
-								// This always refers to the primary actor of the transaction.
 
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sender_account_id")
+	private Account senderAccount;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "receiver_account_id")
+	private Account receiverAccount;
 }
+

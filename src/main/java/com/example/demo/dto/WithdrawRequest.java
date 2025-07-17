@@ -10,4 +10,6 @@ public class WithdrawRequest {
 	private String currencyCode;
 	private String transactionReferenceId;
 	private String narration;
+	private String cardNumber;
+	private String cardPin;
 }
