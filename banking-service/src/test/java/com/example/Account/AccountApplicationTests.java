@@ -1,13 +1,13 @@
-/*package com.fintech.authservice;
+package com.example.Account;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AuthorizationServiceApplicationTests {
+class AccountApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
 
-}*/
+}

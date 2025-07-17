@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # NetBeans
 nbproject/
 build/
@@ -13,7 +12,7 @@ target/
 mvnw
 mvnw.cmd
 
-# IDE
+# IDEs
 .idea/
 *.iml
 *.ipr
@@ -26,14 +25,11 @@ logs/
 # System
 .DS_Store
 Thumbs.db
-=======
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
+# VS Code
+.vscode/
+
+# Spring Tools Suite
 .apt_generated
 .classpath
 .factorypath
@@ -42,22 +38,9 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# HELP.md
+HELP.md
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
->>>>>>> 6e358f2 (Roles , Mappings , DTOS)
+# Specific Target Folders
+!**/src/main/**/target/
+!**/src/test/**/target/
