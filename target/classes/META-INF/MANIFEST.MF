@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Build-Jdk-Spec: 21
+Implementation-Title: AuthorizationServiceApplication
+Implementation-Version: 0.0.1-SNAPSHOT
+Main-Class: com.fintech.authservice.AuthorizationServiceApplication
+Created-By: Maven Integration for Eclipse
+
