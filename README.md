@@ -9,9 +9,9 @@ A secure authentication and authorization service built using Spring Boot. It ha
 
 - User registration and login with JWT tokens
 - Access and refresh tokens
-- Role-based access (`USER`, `ADMIN`, `INTERNAL`)
+- Role-based access (`USER`, `ADMIN`)
 - Permission-based authorization using method + path + role
-- Internal service communication via JWT (no API keys)
+- Internal service communication via JWT
 - Logout with token blacklist
 
 ---
@@ -119,7 +119,7 @@ createdb auth_db
 
 Authorization is enforced through:
 - JWT token in the `Authorization: Bearer <token>` header
-- Role extracted from the token (`USER`, `ADMIN`, `INTERNAL`)
+- Role extracted from the token (`USER`, `ADMIN`)
 - Permission table that maps:  
   `HTTP Method + URL Path + Allowed Roles`
 
@@ -143,7 +143,12 @@ Tests are **not implemented yet**. This section will be updated once test cases 
 
 ## Author
 
-- [Zainab-Rafiq](https://github.com/Zainab-Rafiq)
+[**Zainab-Rafiq**](https://github.com/Zainab-Rafiq)
+
+Project: AdhaPay
+
+Backend Developer Intern-VaultsPay
+
 
 ---
 
