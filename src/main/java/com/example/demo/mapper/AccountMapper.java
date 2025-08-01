@@ -1,6 +1,7 @@
 package com.example.demo.mapper;
 
 import com.example.demo.dto.AccountDto;
+import com.example.demo.dto.AccountSummaryDto;
 import com.example.demo.model.Account;
 
 public class AccountMapper {
@@ -28,5 +29,10 @@ public class AccountMapper {
 		model.setStatus(dto.getStatus());
 		model.setCreatedAt(dto.getCreatedAt());
 		return model;
+	}
+
+	public static AccountSummaryDto toSummary(AccountDto dto) {
+		return new AccountSummaryDto(dto.getId(), dto.getUserId(), dto.getCurrency(), dto.getAccountNumber(),
+				dto.getStatus());
 	}
 }

@@ -15,12 +15,10 @@ public class JwtUtil {
 
 	public UserDto extractUser(String token) {
 		try {
-			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token) // ✅ already raw
-																									// token
-					.getBody();
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
 
 			UserDto user = new UserDto();
-			user.setId(Long.valueOf(claims.get("id").toString()));
+			user.setId(Long.valueOf(claims.getSubject()));
 			user.setEmail(claims.getSubject());
 			user.setRole(claims.get("role").toString());
 
@@ -31,16 +29,26 @@ public class JwtUtil {
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
 		}
-		
-	}
-	public Long extractUserIdFromToken(String token) {
-	    token = token.replace("Bearer ", "");
-	    Claims claims = Jwts.parser()
-	        .setSigningKey(secretKey)
-	        .parseClaimsJws(token)
-	        .getBody();
 
-	    return Long.parseLong(claims.get("id").toString());
 	}
+
+	public Long extractUserIdFromToken(String token) {
+		token = token.replace("Bearer ", "");
+		Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
+
+		return Long.parseLong(claims.getSubject());
+	}
+	public String extractRoleFromToken(String token) {
+		try {
+			Claims claims = Jwts.parser()
+				.setSigningKey(secretKey.getBytes())
+				.parseClaimsJws(token.replace("Bearer ", ""))
+				.getBody();
+			return claims.get("role", String.class);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+		}
+	}
+
 
 }
